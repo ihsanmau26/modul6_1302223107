@@ -1,4 +1,6 @@
-﻿class Program
+﻿using System.Diagnostics.Contracts;
+
+class Program
 {
 
     public class SayaTubeUser
@@ -9,6 +11,11 @@
 
         public SayaTubeUser(String username)
         {
+            if (string.IsNullOrEmpty(username) || username.Length > 100)
+            {
+                throw new ArgumentException("Username maksimal 200 karakter dan tidak null.");
+            }
+
             this.Username = username;
             var rand = new Random();
             this.id = rand.Next(9999);
@@ -48,6 +55,10 @@
 
         public SayaTubeVideo(String title)
         {
+            if(string.IsNullOrEmpty(title) || title.Length > 200)
+            {
+                throw new ArgumentException("Judul video maksimal 200 karakter dan tidak null.");
+            }
             var rand = new Random();
             this.id = rand.Next(9999);
             this.title = title;
@@ -58,7 +69,20 @@
 
         public void IncreasePlayCount(int jmlh)
         {
+            Contract.Requires<ArgumentOutOfRangeException>(jmlh >= 0 && 
+                jmlh <= 25_000_000, "Play Count harus diantara 0 sampai 25.000.000");
             playCount += jmlh;
+            try
+            {
+                checked
+                {
+                    playCount += jmlh;
+                }
+            }
+            catch (OverflowException)
+            {
+                Console.WriteLine("Jumlah play count melebihi batas maksimal");
+            }
         }
 
         public void PrintVideoDetails()
@@ -123,5 +147,4 @@
         pengguna1.PrintAllVideoPlaycount();
         Console.WriteLine();
     }
-
 }
